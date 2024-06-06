@@ -1,3 +1,4 @@
+import re
 import os
 
 
@@ -12,6 +13,29 @@ class Colors:
     WHITE = '\033[97m'
     ORANGE = '\033[38;5;214m'
     VIOLET = '\033[38;5;57m'
+    GREY = '\033[38;5;240m'
+
+
+def green(string):
+    return f'{Colors.GREEN}{string}{Colors.RESET}'
+def red(string):
+    return f'{Colors.RED}{string}{Colors.RESET}'
+def yellow(string):
+    return f'{Colors.YELLOW}{string}{Colors.RESET}'
+def blue(string):
+    return f'{Colors.BLUE}{string}{Colors.RESET}'
+def magenta(string):
+    return f'{Colors.MAGENTA}{string}{Colors.RESET}'
+def cyan(string):
+    return f'{Colors.CYAN}{string}{Colors.RESET}'
+def white(string):
+    return f'{Colors.WHITE}{string}{Colors.RESET}'
+def orange(string):
+    return f'{Colors.ORANGE}{string}{Colors.RESET}'
+def violet(string):
+    return f'{Colors.VIOLET}{string}{Colors.RESET}'
+def grey(string):
+    return f'{Colors.GREY}{string}{Colors.RESET}'
 
 
 def get_fresh_env():
@@ -33,3 +57,33 @@ def get_fresh_env():
         fresh_env[key] = value
 
     return fresh_env
+
+
+def fill_string(string, length, char=' ', alignment='left'):
+    n_fill = length - len(remove_ansi_codes(string))
+    if alignment == 'left':
+        return f'{string}{char*n_fill}'
+    elif alignment == 'right':
+        return f'{char*n_fill}{string}'
+    elif alignment == 'center':
+        if n_fill % 2 == 0:
+            left_fill = right_fill = n_fill // 2
+        else:
+            left_fill = n_fill // 2
+            right_fill = n_fill // 2 + 1
+        return f'{char*left_fill}{string}{char*right_fill}'
+
+
+def remove_ansi_codes(string):
+    ansi_escape = re.compile(r'\x1B\[[0-?]*[ -/]*[@-~]')
+    return ansi_escape.sub('', string)
+
+
+def print_dict(d, indent=0):
+    for key, value in d.items():
+        print(' ' * indent + str(key) + ':', end=' ')
+        if isinstance(value, dict):
+            print()
+            print_dict(value, indent + 4)
+        else:
+            print(str(value))

@@ -1,5 +1,5 @@
 import subprocess
-from lib.messages import error
+from navigator.messages import error
 
 class Tool:
     def __init__(self, name, update_cmd, source_cmd, build_cmd, clean_cmd):

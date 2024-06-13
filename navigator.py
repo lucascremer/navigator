@@ -4,8 +4,8 @@ import textwrap
 import readline
 
 from navigator.command import Command, StepCommand
-from navigator.messages import error, info
-from navigator.helpers import green, red, orange, yellow, cyan, blue, violet, grey, fill_string, print_dict
+from navigator.messages import error, warning, info
+from navigator.helpers import green, red, orange, yellow, cyan, blue, violet, grey, fill_string, print_dict, remove_ansi_codes
 
 
 class Navigator:
@@ -17,7 +17,8 @@ class Navigator:
             error('Failed to load the analysis config file.', exc, fatal=True)
 
         self.history_file = os.path.expanduser(self.analysis_config['history_file'])
-        self.terminal_width = 120
+        terminal_width = os.get_terminal_size().columns
+        self.terminal_width = terminal_width if terminal_width < 120 else 120
         self.cur_step = 'navigator'
         self.init_commands()
 
@@ -39,7 +40,7 @@ class Navigator:
                 args = user_input.split(' ')[1:]
                 if command in self.valid_commands:
                     self.valid_commands[command].execute(*args)
-                elif user_input == '':
+                elif user_input.strip() == '':
                     continue
                 else:
                     error(f'Unknown command: {command}. Type help for a list of available commands.')
@@ -101,14 +102,23 @@ class Navigator:
             error(f'Invalid step: {step}')
             return
 
-        self.cur_step = new_step['name']
+        # attempt to load the step config file
+        try:
+            with open(os.path.expanduser(f'{new_step['path']}/stepconfig.yml'), 'r') as file:
+                self.step_config = yaml.safe_load(file)
+        except (FileNotFoundError, yaml.YAMLError) as exc:
+            error(f'Failed to load the step config file for step {new_step['name']}. Has to be called "stepconfig.yml" and placed in the top level folder of your step.', exc)
+            return
 
-        with open(os.path.expanduser(f'{new_step['path']}/stepconfig.yml'), 'r') as file:
-            self.step_config = yaml.safe_load(file)
+        self.cur_step = new_step['name']
         
+        # load the step commands
         self.step_commands = {}
         for command in self.step_config['step_commands']:
-            self.step_commands[command['name']] = StepCommand(command['name'], command['shellcommand'], new_step['path'], command['args'], command['description'])
+            try:
+                self.step_commands[command['name']] = StepCommand(command['name'], command['shellcommand'], new_step['path'], command['args'], command['description'])
+            except KeyError as exc:
+                warning(f'Failed to load the step command "{command["name"]}": Missing argument {exc}')
 
         self.valid_commands = {**self.valid_navigtor_commands, **self.step_commands}
         info(f'Switched to step: {self.cur_step}')
@@ -155,10 +165,12 @@ class Navigator:
         alignments = []
         for line in lines:
             if type(line) == tuple:
-                wrapped_lines = textwrap.fill(line[0], width=self.terminal_width-4).split('\n')
+                n_ansis = len(line[0]) - len(remove_ansi_codes(line[0]))
+                wrapped_lines = textwrap.fill(line[0], width=self.terminal_width+n_ansis-4).split('\n')
                 alignment = line[1]
             elif type(line) == str:
-                wrapped_lines = textwrap.fill(line, width=self.terminal_width-4).split('\n')
+                n_ansis = len(line) - len(remove_ansi_codes(line))
+                wrapped_lines = textwrap.fill(line, width=self.terminal_width+n_ansis-4).split('\n')
                 alignment = 'left'
             limited_lines.extend(wrapped_lines)
             alignments.extend([alignment]*len(wrapped_lines))
@@ -193,9 +205,9 @@ class Navigator:
             step_names = ''
             for step in self.analysis_config['analysis_steps'][step_level]:
                 if 'path' not in step:
-                    step_names += grey(step["name"]) + ' '
+                    step_names += grey(step["name"]) + '   '
                 else:
-                    step_names += yellow(step["name"]) + ' '
+                    step_names += yellow(step["name"]) + '   '
             lines.append((f'  {step_level}: {step_names}', 'left'))
 
         return lines

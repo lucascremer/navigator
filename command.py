@@ -34,6 +34,7 @@ class StepCommand(Command):
         super().__init__(cmd_nav, self.command, arg_names, description)
         self.shellcommand = shellcommand
         self.step_path = step_path
+        self.n_args = len(arg_names) * 2
         self.arg_help_string = ' '.join([f'--{arg} <{arg}>' for arg in self.arg_names])
 
     def command(self, *args):

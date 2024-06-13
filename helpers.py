@@ -1,5 +1,6 @@
 import re
 import os
+from pathlib import Path
 
 
 class Colors:
@@ -87,3 +88,43 @@ def print_dict(d, indent=0):
             print_dict(value, indent + 4)
         else:
             print(str(value))
+
+
+def replace_placeholder(string, replacements: dict) -> str:
+    for placeholder, replacement in replacements.items():
+        string = string.replace(placeholder, str(replacement))
+    return string
+
+
+class AutoPath:
+    def __init__(self, path):
+        self.path = Path(path).expanduser()
+
+    def __str__(self):
+        return str(self.path)
+
+    def __repr__(self):
+        return f"AutoPath({str(self.path)!r})"
+
+    def __fspath__(self):
+        return str(self.path)
+
+    def __add__(self, other):
+        return AutoPath(self.path / other)
+    
+    def __radd__(self, other):
+        return AutoPath(Path(other) / self.path)
+    
+    def __truediv__(self, other):
+        return AutoPath(self.path / other)
+    
+    def __rtruediv__(self, other):
+        return AutoPath(Path(other) / self.path)
+
+    def __eq__(self, other):
+        if isinstance(other, AutoPath):
+            return self.path == other.path
+        return self.path == other
+
+    def __ne__(self, other):
+        return not self.__eq__(other)

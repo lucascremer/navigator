@@ -1,4 +1,4 @@
-from navigator.helpers import Colors
+from navigator.utils import Colors
 
 def error(message='', exc='', fatal=False):
     if len(message) != 0:

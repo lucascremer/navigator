@@ -3,9 +3,9 @@ import yaml
 import textwrap
 import readline
 
-from navigator.command import Command, StepCommand
+from navigator.command import NavigatorCommand, StepCommand
 from navigator.messages import error, warning, info
-from navigator.helpers import green, red, orange, yellow, cyan, blue, violet, grey, fill_string, print_dict, remove_ansi_codes
+from navigator.utils import AutoPath, green, red, orange, yellow, cyan, blue, violet, grey, fill_string, print_dict, remove_ansi_codes
 
 
 class Navigator:
@@ -16,7 +16,7 @@ class Navigator:
         except (FileNotFoundError, yaml.YAMLError) as exc:
             error('Failed to load the analysis config file.', exc, fatal=True)
 
-        self.history_file = os.path.expanduser(self.analysis_config['history_file'])
+        self.history_file = AutoPath(self.analysis_config['history_file'])
         terminal_width = os.get_terminal_size().columns
         self.terminal_width = terminal_width if terminal_width < 120 else 120
         self.cur_step = 'navigator'
@@ -74,12 +74,12 @@ class Navigator:
 
     def init_commands(self):
         self.valid_navigtor_commands = {
-            'config': Command('config', self.print_config, [], 'Prints the loaded analysis config.'),
-            'exit': Command('exit', self.exit_navigator, [], 'Exits the navigator right away.'),
-            'switch_step': Command('switch_step', self.switch_step, ['step_name'], 'Switches to the specified step.'),
-            'leave_step': Command('leave_step', self.leave_step, [], 'Leaves the current step and returns to the main navigator level.'),
-            'help': Command('help', self.help, [], 'Prints the help message.'),
-            'cmds': Command('cmds', self.print_avail_cmds, [], 'Prints the available commands.')
+            'config': NavigatorCommand('config', self.print_config, [], 'Prints the loaded analysis config.'),
+            'exit': NavigatorCommand('exit', self.exit_navigator, [], 'Exits the navigator right away.'),
+            'switch_step': NavigatorCommand('switch_step', self.switch_step, ['step_name'], 'Switches to the specified step.'),
+            'leave_step': NavigatorCommand('leave_step', self.leave_step, [], 'Leaves the current step and returns to the main navigator level.'),
+            'help': NavigatorCommand('help', self.help, [], 'Prints the help message.'),
+            'cmds': NavigatorCommand('cmds', self.print_avail_cmds, [], 'Prints the available commands.')
         }
         self.step_commands = {}
         self.valid_commands = self.valid_navigtor_commands.copy()
@@ -104,7 +104,7 @@ class Navigator:
 
         # attempt to load the step config file
         try:
-            with open(os.path.expanduser(f'{new_step['path']}/stepconfig.yml'), 'r') as file:
+            with open(AutoPath(f'{new_step['path']}/stepconfig.yml'), 'r') as file:
                 self.step_config = yaml.safe_load(file)
         except (FileNotFoundError, yaml.YAMLError) as exc:
             error(f'Failed to load the step config file for step {new_step['name']}. Has to be called "stepconfig.yml" and placed in the top level folder of your step.', exc)

@@ -1,5 +1,4 @@
 import re
-import os
 from pathlib import Path
 
 
@@ -41,7 +40,7 @@ def grey(string):
 
 def get_fresh_env():
     # load in the environment variables from ~/.fresh_env
-    with open(os.path.expanduser('~/.fresh_env'), 'r') as f:
+    with open(AutoPath('~/.fresh_env'), 'r') as f:
         env = f.read()
         lines = env.split('\n')
 
@@ -60,22 +59,23 @@ def get_fresh_env():
     return fresh_env
 
 
-def fill_string(string, length, char=' ', alignment='left'):
+def fill_string(string, length, fill_char=' ', alignment='left'):
     n_fill = length - len(remove_ansi_codes(string))
     if alignment == 'left':
-        return f'{string}{char*n_fill}'
+        return f'{string}{fill_char*n_fill}'
     elif alignment == 'right':
-        return f'{char*n_fill}{string}'
+        return f'{fill_char*n_fill}{string}'
     elif alignment == 'center':
         if n_fill % 2 == 0:
             left_fill = right_fill = n_fill // 2
         else:
             left_fill = n_fill // 2
             right_fill = n_fill // 2 + 1
-        return f'{char*left_fill}{string}{char*right_fill}'
+        return f'{fill_char*left_fill}{string}{fill_char*right_fill}'
 
 
 def remove_ansi_codes(string):
+    string = str(string)
     ansi_escape = re.compile(r'\x1B\[[0-?]*[ -/]*[@-~]')
     return ansi_escape.sub('', string)
 

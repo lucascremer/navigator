@@ -30,11 +30,11 @@ class NavigatorCommand:
     
 
 class StepCommand:
-    def __init__(self, cmd_nav, shellcommand, step_path, arg_names, description=''):
+    def __init__(self, cmd_nav, shellcommand, step_path, usage_args, description=''):
         self.cmd_nav = cmd_nav
         self.shellcommand = shellcommand
         self.step_path = step_path
-        self.arg_help_string = ' '.join([f'--{arg} <{arg}>' for arg in arg_names])
+        self.usage_args = usage_args
         self.description = description
 
     def execute(self, *args):
@@ -47,6 +47,6 @@ class StepCommand:
         return
     
     def help(self):
-        help_string = f'\n{self.description}\n\nUsage: {self.cmd_nav} ' + self.arg_help_string + '\n\n'
+        help_string = f'\n{self.description}\n\nUsage: {self.cmd_nav} ' + self.usage_args + '\n\n'
         print(blue(help_string))
         return

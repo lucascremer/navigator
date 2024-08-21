@@ -79,7 +79,8 @@ class Navigator:
             'switch_step': NavigatorCommand('switch_step', self.switch_step, ['step_name'], 'Switches to the specified step.'),
             'leave_step': NavigatorCommand('leave_step', self.leave_step, [], 'Leaves the current step and returns to the main navigator level.'),
             'help': NavigatorCommand('help', self.help, [], 'Prints the help message.'),
-            'cmds': NavigatorCommand('cmds', self.print_avail_cmds, [], 'Prints the available commands.')
+            'cmds': NavigatorCommand('cmds', self.print_avail_cmds, [], 'Prints the available commands.'),
+            'tool_manager': NavigatorCommand('tool_manager', self.tool_manager, [], 'Opens the tool manager.')
         }
         self.step_commands = {}
         self.valid_commands = self.valid_navigtor_commands.copy()
@@ -93,13 +94,13 @@ class Navigator:
                     new_step = step
                     step_found = True
                 step_names.append(step['name'])
-
-        if 'path' not in new_step:
-            error(f'Step {step_name} is not yet implemented.')
-            return
         
         if not step_found:
             error(f'Invalid step: {step}')
+            return
+
+        if 'path' not in new_step:
+            error(f'Step {step_name} is not yet implemented.')
             return
 
         # attempt to load the step config file
@@ -116,7 +117,7 @@ class Navigator:
         self.step_commands = {}
         for command in self.step_config['step_commands']:
             try:
-                self.step_commands[command['name']] = StepCommand(command['name'], command['shellcommand'], new_step['path'], command['args'], command['description'])
+                self.step_commands[command['name']] = StepCommand(command['name'], command['shellcommand'], new_step['path'], command['usage_args'], command['description'])
             except KeyError as exc:
                 warning(f'Failed to load the step command "{command["name"]}": Missing argument {exc}')
 
@@ -130,7 +131,7 @@ class Navigator:
             info('No active step to leave.')
             return
         self.cur_step = 'navigator'
-        self.valid_commands = self.valid_navigtor_commands
+        self.valid_commands = self.valid_navigtor_commands.copy()
         self.step_config = None
         self.step_commands = {}
         info('Left the current step')
@@ -154,7 +155,7 @@ class Navigator:
             lines += [('','center')]
         lines += self.available_commands()
         lines += [('','center')]
-        lines += [('If you need help with a specific command, type <command> help.', 'left')]
+        lines += [('If you need help with a specific command, type "<command> help".', 'left')]
         
         self.boxed_message(lines)
         return

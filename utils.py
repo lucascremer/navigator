@@ -39,6 +39,9 @@ def grey(string):
 
 
 def get_fresh_env():
+    if not Path('~/.fresh_env').exists():
+        raise FileNotFoundError('ERROR: File ~/.fresh_env does not exist. Add `env > ~/.fresh_env` to the end of you bashrc for this to work.')
+
     # load in the environment variables from ~/.fresh_env
     with open(AutoPath('~/.fresh_env'), 'r') as f:
         env = f.read()

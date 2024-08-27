@@ -80,7 +80,7 @@ class Navigator:
             'leave_step': NavigatorCommand('leave_step', self.leave_step, [], 'Leaves the current step and returns to the main navigator level.'),
             'help': NavigatorCommand('help', self.help, [], 'Prints the help message.'),
             'cmds': NavigatorCommand('cmds', self.print_avail_cmds, [], 'Prints the available commands.'),
-            'tool_manager': NavigatorCommand('tool_manager', self.tool_manager, [], 'Opens the tool manager.')
+            # 'tool_manager': NavigatorCommand('tool_manager', self.tool_manager, [], 'Opens the tool manager.')
         }
         self.step_commands = {}
         self.valid_commands = self.valid_navigtor_commands.copy()

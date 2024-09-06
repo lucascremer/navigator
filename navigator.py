@@ -176,10 +176,10 @@ class Navigator:
             limited_lines.extend(wrapped_lines)
             alignments.extend([alignment]*len(wrapped_lines))
 
-        print(cyan(f'+{"-"*(self.terminal_width-2)}+'))
+        print(cyan(f'┏{"━"*(self.terminal_width-2)}┓'))
         for line, alignment in zip(limited_lines, alignments):
-            print(cyan('| ') + fill_string(line, self.terminal_width-4, alignment=alignment) + cyan(' |'))
-        print(cyan(f'+{"-"*(self.terminal_width-2)}+'))
+            print(cyan('┃ ') + fill_string(line, self.terminal_width-4, alignment=alignment) + cyan(' ┃'))
+        print(cyan(f'┗{"━"*(self.terminal_width-2)}┛'))
 
         return
 

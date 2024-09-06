@@ -1,3 +1,4 @@
+import os
 import re
 from pathlib import Path
 
@@ -39,7 +40,7 @@ def grey(string):
 
 
 def get_fresh_env():
-    if not Path('~/.fresh_env').exists():
+    if not os.path.exists(AutoPath('~/.fresh_env')):
         raise FileNotFoundError('ERROR: File ~/.fresh_env does not exist. Add `env > ~/.fresh_env` to the end of you bashrc for this to work.')
 
     # load in the environment variables from ~/.fresh_env

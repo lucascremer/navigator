@@ -36,6 +36,8 @@ class Navigator:
             try:
                 user_input = input(f'{self.cur_step}> ')
                 readline.write_history_file(self.history_file)
+                terminal_width = os.get_terminal_size().columns
+                self.terminal_width = terminal_width if terminal_width < 120 else 120
                 command = user_input.split(' ')[0]
                 args = user_input.split(' ')[1:]
                 if command in self.valid_commands:

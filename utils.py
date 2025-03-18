@@ -132,3 +132,6 @@ class AutoPath:
 
     def __ne__(self, other):
         return not self.__eq__(other)
+    
+    def rglob(self, pattern):
+        return self.path.rglob(pattern)

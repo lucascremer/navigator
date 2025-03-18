@@ -57,7 +57,7 @@ class Navigator:
     def exit_navigator(self, ctrl_D=False):
         if ctrl_D:
             print('exit')
-        print(f'Exiting... {red('G')}{orange('o')}{yellow('o')}{green('d')}{cyan('b')}{blue('y')}{violet('e')} :)')
+        print(f'Exiting... {red("G")}{orange("o")}{yellow("o")}{green("d")}{cyan("b")}{blue("y")}{violet("e")} :)')
         exit(0)
 
     def print_config(self):
@@ -82,7 +82,6 @@ class Navigator:
             'leave_step': NavigatorCommand('leave_step', self.leave_step, [], 'Leaves the current step and returns to the main navigator level.'),
             'help': NavigatorCommand('help', self.help, [], 'Prints the help message.'),
             'cmds': NavigatorCommand('cmds', self.print_avail_cmds, [], 'Prints the available commands.'),
-            # 'tool_manager': NavigatorCommand('tool_manager', self.tool_manager, [], 'Opens the tool manager.')
         }
         self.step_commands = {}
         self.valid_commands = self.valid_navigtor_commands.copy()
@@ -107,10 +106,10 @@ class Navigator:
 
         # attempt to load the step config file
         try:
-            with open(AutoPath(f'{new_step['path']}/stepconfig.yml'), 'r') as file:
+            with open(AutoPath(f'{new_step["path"]}/stepconfig.yml'), 'r') as file:
                 self.step_config = yaml.safe_load(file)
         except (FileNotFoundError, yaml.YAMLError) as exc:
-            error(f'Failed to load the step config file for step {new_step['name']}. Has to be called "stepconfig.yml" and placed in the top level folder of your step.', exc)
+            error(f'Failed to load the step config file for step {new_step["name"]}. Has to be called "stepconfig.yml" and placed in the top level folder of your step.', exc)
             return
 
         self.cur_step = new_step['name']

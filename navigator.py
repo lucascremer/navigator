@@ -1,4 +1,5 @@
 import os
+import re
 import yaml
 import textwrap
 import readline
@@ -17,6 +18,7 @@ class Navigator:
             error('Failed to load the analysis config file.', exc, fatal=True)
 
         self.history_file = AutoPath(self.analysis_config['history_file'])
+        self.possible_steps = {step['name']: step for step_level in self.analysis_config['analysis_steps'].values() for step in step_level}
         terminal_width = os.get_terminal_size().columns
         self.terminal_width = terminal_width if terminal_width < 120 else 120
         self.cur_step = 'navigator'
@@ -25,6 +27,7 @@ class Navigator:
         # initialize readline
         readline.set_completer(self.tab_completion)
         readline.parse_and_bind("tab: complete")
+        readline.set_completer_delims(readline.get_completer_delims().replace('-', ''))
         try:
             readline.read_history_file(self.history_file)
         except FileNotFoundError:
@@ -34,16 +37,16 @@ class Navigator:
         self.welcome_message()
         while True:
             try:
-                user_input = input(f'{self.cur_step}> ')
+                user_input = input(f'{self.cur_step}> ').strip()
                 readline.write_history_file(self.history_file)
                 terminal_width = os.get_terminal_size().columns
                 self.terminal_width = terminal_width if terminal_width < 120 else 120
-                command = user_input.split(' ')[0]
-                args = user_input.split(' ')[1:]
+                if user_input == '':
+                    continue
+                command = user_input.split()[0]
+                args = user_input.split()[1:]
                 if command in self.valid_commands:
                     self.valid_commands[command].execute(*args)
-                elif user_input.strip() == '':
-                    continue
                 else:
                     error(f'Unknown command: {command}. Type help for a list of available commands.')
             except EOFError: # Ctrl+D
@@ -78,7 +81,7 @@ class Navigator:
         self.valid_navigtor_commands = {
             'config': NavigatorCommand('config', self.print_config, [], 'Prints the loaded analysis config.'),
             'exit': NavigatorCommand('exit', self.exit_navigator, [], 'Exits the navigator right away.'),
-            'switch_step': NavigatorCommand('switch_step', self.switch_step, ['step_name'], 'Switches to the specified step.'),
+            'switch_step': NavigatorCommand('switch_step', self.switch_step, ['step_name'], 'Switches to the specified step.', list(self.possible_steps.keys())),
             'leave_step': NavigatorCommand('leave_step', self.leave_step, [], 'Leaves the current step and returns to the main navigator level.'),
             'help': NavigatorCommand('help', self.help, [], 'Prints the help message.'),
             'cmds': NavigatorCommand('cmds', self.print_avail_cmds, [], 'Prints the available commands.'),
@@ -87,19 +90,12 @@ class Navigator:
         self.valid_commands = self.valid_navigtor_commands.copy()
 
     def switch_step(self, step_name):
-        step_names = []
-        step_found = False
-        for steps in self.analysis_config['analysis_steps'].values():
-            for step in steps:
-                if step['name'] == step_name:
-                    new_step = step
-                    step_found = True
-                step_names.append(step['name'])
-        
-        if not step_found:
-            error(f'Invalid step: {step}')
+        if step_name not in self.possible_steps:
+            error(f'Invalid step: {step_name}.', f'Available steps: {", ".join(self.possible_steps.keys())}')
             return
-
+        
+        new_step = self.possible_steps[step_name]
+        
         if 'path' not in new_step:
             error(f'Step {step_name} is not yet implemented.')
             return
@@ -220,7 +216,20 @@ class Navigator:
         return
     
     def tab_completion(self, text, state):
-        options = [command for command in self.valid_commands.keys() if command.startswith(text)]
+        line_buffer = readline.get_line_buffer().lstrip()
+        if text == line_buffer:
+            options = [command for command in self.valid_commands.keys() if command.startswith(text)]
+        else:
+            buffered_cmd = line_buffer.split()[0]
+            if buffered_cmd in self.valid_navigtor_commands:
+                options = [poss_arg for poss_arg in self.valid_navigtor_commands[buffered_cmd].possible_arg_vals if poss_arg.startswith(text)]
+            elif buffered_cmd in self.step_commands:
+                usage_args_cleaned = re.sub(r'<[^>]*>', '', self.step_commands[buffered_cmd].usage_args) # remove angle brackets, e.g. "--arg1 <arg1>" -> "--arg1"
+                poss_args = usage_args_cleaned.replace('(', '').replace(')', '').split()
+                options = [poss_arg for poss_arg in poss_args if poss_arg.startswith(text) and poss_arg not in line_buffer.split()[1:]]  # avoid already used args
+            else:
+                options = []
+
         try:
             return options[state]
         except IndexError:

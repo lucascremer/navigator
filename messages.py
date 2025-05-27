@@ -1,9 +1,9 @@
 from navigator.utils import Colors
 
-def error(message='', exc='', fatal=False):
+def error(message='', details='', fatal=False):
     if len(message) != 0:
         message += ' '
-    print(f'{Colors.RED}ERROR: {message}{Colors.ORANGE}{exc}{Colors.RESET}')
+    print(f'{Colors.RED}ERROR: {message}{Colors.ORANGE}{details}{Colors.RESET}')
     if fatal:
         exit(1)
     else:

@@ -5,12 +5,13 @@ from navigator.utils import blue
 
 
 class NavigatorCommand:
-    def __init__(self, cmd_nav, func, arg_names, description=''):
+    def __init__(self, cmd_nav, func, arg_names, description='', possible_arg_vals=[]):
         self.cmd_nav = cmd_nav
         self.func = func
         self.description = description
         self.n_args = len(arg_names)
         self.arg_help_string = ' '.join([f'<{arg}>' for arg in arg_names])
+        self.possible_arg_vals = possible_arg_vals
 
     def execute(self, *args):
         if len(args) == 1 and args[0] == 'help':

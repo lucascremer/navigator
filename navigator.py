@@ -69,7 +69,7 @@ class Navigator:
     def welcome_message(self):
         lines = [
             ('Welcome to the Navigator!', 'center'),
-            (f'Analysis: {self.analysis_config["name"]}', 'center'),
+            (f'Analysis: {violet(self.analysis_config["name"])}', 'center'),
             ('', 'center'),
         ]
         lines += self.get_analysis_steps()
@@ -137,13 +137,13 @@ class Navigator:
     def help(self):
         if self.cur_step == 'navigator':
             lines = [
-                (f'Analysis: {self.analysis_config["name"]}', 'center'),
+                (f'Analysis: {violet(self.analysis_config["name"])}', 'center'),
                 ('', 'center')
             ]
             lines += self.get_analysis_steps() + [('','center')]
         else:
             lines = [
-                (f'Step: {self.cur_step}', 'center'),
+                (f'Step: {violet(self.cur_step)}', 'center'),
                 ('', 'center')
             ]
             step_description = self.step_config['description']

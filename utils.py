@@ -1,5 +1,9 @@
 import os
 import re
+import sys
+import tty
+import yaml
+import termios
 from pathlib import Path
 
 
@@ -98,6 +102,19 @@ def replace_placeholder(string, replacements: dict) -> str:
     for placeholder, replacement in replacements.items():
         string = string.replace(placeholder, str(replacement))
     return string
+
+
+def get_raw_key_input():
+    fd = sys.stdin.fileno()
+    old_settings = termios.tcgetattr(fd)
+    try:
+        tty.setraw(fd)  # raw mode (no buffering, no enter needed)
+        ch = sys.stdin.read(1)
+        if ch == '\x1b':  # start of escape sequence
+            ch += sys.stdin.read(2)  # read two more chars
+        return ch
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
 
 class AutoPath:

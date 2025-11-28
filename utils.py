@@ -107,7 +107,6 @@ def create_folder(path, depth=0):
             cur_path = posix_path
         else:
             cur_path = posix_path.parents[pos-1]
-        print(f'Creating folder: {cur_path}')
         if not os.path.exists(cur_path):
             os.mkdir(cur_path)
 

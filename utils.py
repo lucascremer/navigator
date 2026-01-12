@@ -86,14 +86,14 @@ def soft_recreate_folder(path, depth=0):
     home_path = Path(os.path.expanduser('~'))
     endangered_paths = [posix_path.parents[i] for i in range(depth+1)] + [posix_path] 
     if home_path in endangered_paths:
-        raise ValueError(f'Refusing to recreate folder ({posix_path.parents[depth-1]}) that is or is inside the home directory.')
+        raise ValueError(f'Refusing to recreate folder {posix_path.parents[depth-1]} that is or is inside the home directory.')
     for pos in range(depth, -1, -1):
         if pos == 0:
             cur_path = posix_path
         else:
             cur_path = posix_path.parents[pos-1]
         if os.path.exists(cur_path):
-            verified = input(f'Do you want to clear the folder ({yellow(cur_path)})? [y/n]: ')
+            verified = input(f'Do you want to clear the folder {yellow(cur_path)}? [y/n]: ')
             if verified == 'y':
                 os.system(f'rm -r {cur_path}')
         if not os.path.exists(cur_path):

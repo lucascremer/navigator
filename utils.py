@@ -3,6 +3,7 @@ import re
 import sys
 import tty
 import termios
+import subprocess
 from pathlib import Path
 
 
@@ -95,7 +96,7 @@ def soft_recreate_folder(path, depth=0):
         if os.path.exists(cur_path):
             verified = input(f'Do you want to clear the folder {yellow(cur_path)}? [y/n]: ')
             if verified == 'y':
-                os.system(f'rm -r {cur_path}')
+                subprocess.run(f'rm -r {cur_path}', shell=True)
         if not os.path.exists(cur_path):
             os.mkdir(cur_path)
 
